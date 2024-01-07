@@ -1,7 +1,9 @@
 package com.example.jpaspecifications.specifications;
 
 import com.example.jpaspecifications.entities.Category;
+import com.example.jpaspecifications.entities.Category_;
 import com.example.jpaspecifications.entities.Product;
+import com.example.jpaspecifications.entities.Product_;
 import com.example.jpaspecifications.specifications.criteria.ProductSearchCriteria;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,7 +16,7 @@ import java.util.Objects;
 public class ProductSpecification {
     private static List<Predicate> predicates;
 
-    public static Specification<Product> combinedSpec(
+    public static Specification<Product> combinedSpecV2(
             ProductSearchCriteria criteria
     ) {
         return (root, query, cb) -> {
@@ -34,7 +36,7 @@ public class ProductSpecification {
         if (StringUtils.hasText(str)) {
             String formattedStr = "%" + str.toLowerCase() + "%";
             predicates.add(cb.like(
-                    cb.lower(root.get("name")),
+                    cb.lower(root.get(Product_.name)),
                     formattedStr
             ));
         }
@@ -65,43 +67,38 @@ public class ProductSpecification {
             }
     }
 
-    public static Specification<Product> combinedSpecV2(ProductSearchCriteria criteria) {
-        Specification<Product> spec = Specification.where(null);
-        spec = spec.and(ProductSpecification.likeName(criteria.getName()));
-        spec = spec.and(ProductSpecification.likeCategory(criteria.getCategoryName()));
-        spec = spec.and(ProductSpecification.lessThanPrice(criteria.getPrice()));
-        return spec;
+    public static Specification<Product> combinedSpec(ProductSearchCriteria criteria) {
+        return Specification
+                .where(ProductSpecification.likeName(criteria.getName()))
+                .and(ProductSpecification.likeCategory(criteria.getCategoryName()))
+                .and(ProductSpecification.lessThanPrice(criteria.getPrice()));
     }
-
     public static Specification<Product> likeName(String str) {
         return (root, query, criteriaBuilder) -> {
             if (!StringUtils.hasText(str)) return null;
             String formattedStr = "%" + str.toLowerCase() + "%";
             return criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("name")),
+                    criteriaBuilder.lower(root.get(Product_.name)),
                     formattedStr
             );
         };
     }
-
     public static Specification<Product> likeCategory(String str) {
         return (root, query, criteriaBuilder) -> {
             if (!StringUtils.hasText(str)) return null;
             String formattedCategoryStr = "%" + str.toLowerCase() + "%";
-            Join<Category,Product> prodCatJoin = root.join("category", JoinType.INNER);
+            Join<Product, Category> prodCatJoin = root.join(Product_.category, JoinType.INNER);
             return criteriaBuilder.like(
-                    criteriaBuilder.lower(prodCatJoin.get("name")),
+                    criteriaBuilder.lower(prodCatJoin.get(Category_.name)),
                     formattedCategoryStr
             );
         };
     }
-
     public static Specification<Product> lessThanPrice(Double value) {
         return (root, query, criteriaBuilder) -> {
             if (Objects.isNull(value) || value <= 0) return null;
-            return criteriaBuilder.lessThan(root.get("price"), value);
+            return criteriaBuilder.lessThan(root.get(Product_.price), value);
         };
     }
-
     // Add more methods for additional criteria
 }
