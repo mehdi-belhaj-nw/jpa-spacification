@@ -23,6 +23,9 @@ public class ProductService {
     public Product save(Product newProduct) {
         return repository.save(newProduct);
     }
+    public List<Product> findAll() {
+        return repository.findAll();
+    }
 
     /** Using a single specification */
     public List<Product> findProductsByNameLike(String name) {
@@ -31,7 +34,7 @@ public class ProductService {
     }
 
     /** Combining multiple specifications in the service */
-    public List<Product> findProductsByCriteria(
+    public List<Product> findProductsByCriteriaCombinedInService(
             ProductSearchCriteria criteria
     ) {
         Specification<Product> spec = Specification.where(null);
