@@ -69,9 +69,9 @@ public class ProductSpecification {
 
     public static Specification<Product> combinedSpec(ProductSearchCriteria criteria) {
         return Specification
-                .where(ProductSpecification.likeName(criteria.getName()))
-                .and(ProductSpecification.likeCategory(criteria.getCategoryName()))
-                .and(ProductSpecification.lessThanPrice(criteria.getPrice()));
+                .where(likeName(criteria.getName()))
+                .and(likeCategory(criteria.getCategoryName()))
+                .and(lessThanPrice(criteria.getPrice()));
     }
     public static Specification<Product> likeName(String str) {
         return (root, query, criteriaBuilder) -> {
